@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}{% if tender %}{{ tender.title }}{% else %}غير موجود{% endif %} — {{ app_name }}{% endblock %}
+{% block body_class %}page-inner{% endblock %}
+
+{% block content %}
+{% if not tender %}
+<section class="page-shell page-inner-wrap empty-state">
+  <h1>المناقصة غير موجودة</h1>
+  <p><a class="btn btn-primary" href="/search">العودة إلى البحث</a></p>
+</section>
+{% else %}
+<article class="page-shell page-inner-wrap tender-detail">
+  <div class="detail-top">
+    <a class="back-link" href="/search">← العودة للبحث</a>
+    <div class="detail-actions">
+      {% if tender.original_url %}
+      <a class="btn btn-secondary" href="{{ tender.original_url }}" target="_blank" rel="noopener noreferrer">المصدر الرسمي</a>
+      {% endif %}
+      {% if documents and documents[0].storage_key.startswith('http') %}
+      <a class="btn btn-primary" href="{{ documents[0].storage_key }}" target="_blank" rel="noopener noreferrer">فتح المرفق</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <header class="detail-header">
+    <div class="detail-kicker">
+      <span class="source-pill">{{ source_name }}</span>
+      <span>{{ organization_name }}</span>
+      {% if tender.tender_number %}<span>رقم {{ tender.tender_number }}</span>{% endif %}
+      {% if tender.tender_type %}<span>{{ tender.tender_type }}</span>{% endif %}
+    </div>
+    <h1>{{ tender.title }}</h1>
+    <div class="detail-status-bar">
+      <span class="badge status-{{ tender.status }}">{{ status_label }}</span>
+      <span class="remain-box {% if remaining.is_expired %}expired{% endif %}">
+        <small>الوقت المتبقي</small>
+        <strong>{{ remaining.label }}</strong>
+      </span>
+    </div>
+  </header>
+
+  <section class="detail-panel">
+    <h2>بيانات المناقصة</h2>
+    <dl class="facts-grid">
+      <div>
+        <dt>مصدر السحب</dt>
+        <dd>
+          {% if source_url %}
+          <a href="{{ source_url }}" target="_blank" rel="noopener noreferrer">{{ source_name }}</a>
+          {% else %}
+          {{ source_name }}
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>جهة التعاقد</dt>
+        <dd>{{ organization_name }}</dd>
+      </div>
+      {% if parent_organization_name %}
+      <div>
+        <dt>الجهة الأم</dt>
+        <dd>{{ parent_organization_name }}</dd>
+      </div>
+      {% endif %}
+      <div>
+        <dt>الحالة</dt>
+        <dd>{{ status_label }}</dd>
+      </div>
+      <div>
+        <dt>تاريخ النشر</dt>
+        <dd>{% if tender.publication_date %}{{ tender.publication_date.strftime("%d/%m/%Y") }}{% else %}—{% endif %}</dd>
+      </div>
+      <div>
+        <dt>آخر موعد للتقديم</dt>
+        <dd>
+          {% if tender.submission_deadline %}
+            {{ tender.submission_deadline.strftime("%d/%m/%Y %H:%M") }}
+          {% else %}—{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>الوقت المتبقي</dt>
+        <dd class="{% if remaining.is_expired %}expired{% endif %}">{{ remaining.label }}</dd>
+      </div>
+      <div>
+        <dt>القيمة التقديرية</dt>
+        <dd>
+          {% if tender.estimated_value %}
+            {{ "{:,.0f}".format(tender.estimated_value) }} {{ tender.currency }}
+          {% else %}غير محددة{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>ثمن الوثائق</dt>
+        <dd>
+          {% if document_price %}
+            {{ "{:,.0f}".format(document_price|float) }} {{ document_price_currency }}
+          {% else %}—{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>مكان شراء الوثائق</dt>
+        <dd>{{ document_purchase_place or "—" }}</dd>
+      </div>
+      {% if subject %}
+      <div>
+        <dt>الموضوع / النشاط</dt>
+        <dd>{{ subject }}</dd>
+      </div>
+      {% endif %}
+    </dl>
+  </section>
+
+  {% if tender.description %}
+  <section class="detail-panel">
+    <h2>ملاحظات الإعلان</h2>
+    <p class="detail-note">{{ tender.description }}</p>
+  </section>
+  {% endif %}
+
+  <section class="detail-panel">
+    <div class="panel-head">
+      <h2>المرفقات</h2>
+      <span class="panel-count">{{ documents|length }}</span>
+    </div>
+    {% if documents %}
+    <div class="table-wrap">
+      <table class="data-table docs-table">
+        <thead>
+          <tr>
+            <th>اسم الملف</th>
+            <th>النوع</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for doc in documents %}
+          <tr>
+            <td><strong>{{ doc.filename }}</strong></td>
+            <td>{{ doc.mime_type or "ملف" }}</td>
+            <td class="table-action">
+              {% if doc.storage_key.startswith('http') %}
+              <a class="btn btn-small btn-secondary" href="{{ doc.storage_key }}" target="_blank" rel="noopener noreferrer">تحميل</a>
+              {% else %}
+              <span class="meta">غير متاح</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty">لا توجد مرفقات معلنة لهذا السجل.</p>
+    {% endif %}
+  </section>
+</article>
+{% endif %}
+{% endblock %}

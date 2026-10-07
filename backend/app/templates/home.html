@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}{{ app_name }} — اكتشف المناقصات الحكومية{% endblock %}
+{% block body_class %}page-home{% endblock %}
+{% block header_class %}is-over-hero{% endblock %}
+{% block nav_cta_class %}btn-ghost-light{% endblock %}
+
+{% block content %}
+<section class="hero" aria-label="القسم الرئيسي">
+  <div class="hero-media" role="img" aria-label="مشهد حضري يمثل بيئة الأعمال والمناقصات"></div>
+  <div class="hero-grain" aria-hidden="true"></div>
+  <div class="hero-copy">
+    <p class="brand-mark">TenderIQ <em>Iraq</em></p>
+    <h1>اكتشف المناقصات الحكومية قبل فوات الفرصة</h1>
+    <p class="lead">بحث ومراقبة للعروض والمناقصات العراقية من مصدر رسمي موحّد.</p>
+    <form class="search-bar" action="/search" method="get">
+      <input
+        type="search"
+        name="q"
+        placeholder="ابحث عن مناقصة، جهة تعاقد، أو كلمة مفتاحية..."
+        aria-label="بحث المناقصات"
+        autocomplete="off"
+      />
+      <button type="submit">بحث</button>
+    </form>
+  </div>
+</section>
+
+<section class="section">
+  <div class="page-shell">
+    <div class="section-head">
+      <h2>نبض المنصة</h2>
+      <p>بيانات محفوظة في قاعدة البيانات وتُحدَّث تلقائياً من المصادر الرسمية</p>
+    </div>
+    <div class="stats-row" aria-label="إحصائيات المنصة">
+      <div><strong>{{ "{:,}".format(stats.tenders) }}</strong><span>مناقصة</span></div>
+      <div><strong>{{ "{:,}".format(stats.organizations) }}</strong><span>جهة تعاقد</span></div>
+      <div><strong>{{ "{:,}".format(stats.documents) }}</strong><span>مرفق</span></div>
+      <div><strong>{{ "{:,}".format(stats.sources) }}</strong><span>مصدر</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 0;">
+  <div class="page-shell">
+    <div class="section-head">
+      <h2>أحدث المناقصات</h2>
+      <a href="/search">عرض الكل</a>
+    </div>
+
+    {% if latest_tenders %}
+    <ul class="tender-list">
+      {% for item in latest_tenders %}
+      <li>
+        <a href="/tenders/{{ item.tender.id }}">
+          <span class="meta">
+            <span class="source-pill">{{ item.source_name }}</span>
+            · {{ item.organization_name }}
+            · {{ item.status_label }}
+            · متبقي: {{ item.remaining.label }}
+          </span>
+          <strong>{{ item.tender.title }}</strong>
+          {% if item.tender.submission_deadline %}
+          <span class="deadline">آخر موعد: {{ item.tender.submission_deadline.strftime("%d/%m/%Y") }}</span>
+          {% endif %}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">لا توجد مناقصات بعد. شغّل زحف ITP لإظهار النتائج.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

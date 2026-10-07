@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}بحث المناقصات — {{ app_name }}{% endblock %}
+{% block body_class %}page-inner{% endblock %}
+
+{% block content %}
+<section class="page-shell page-inner-wrap">
+  <div class="page-toolbar">
+    <div>
+      <p class="eyebrow">المكتبة العامة</p>
+      <h1>بحث المناقصات</h1>
+      <p class="page-sub">اعرض النتائج في جدول منظم مع الحالة والوقت المتبقي وجهة التعاقد.</p>
+    </div>
+    <div class="toolbar-actions">
+      <a class="btn btn-ghost" href="/">الرئيسية</a>
+      <a class="btn btn-primary" href="/search">تحديث النتائج</a>
+    </div>
+  </div>
+
+  <form class="filter-panel" action="/search" method="get">
+    <div class="filter-grid">
+      <label class="field">
+        <span>كلمة البحث</span>
+        <input type="search" name="q" value="{{ q }}" placeholder="عنوان، رقم، أو جهة..." />
+      </label>
+      <label class="field">
+        <span>المحافظة</span>
+        <select name="governorate">
+          <option value="">الكل</option>
+          {% for g in ["بغداد", "البصرة", "نينوى", "أربيل", "السليمانية", "دهوك", "النجف", "كربلاء"] %}
+          <option value="{{ g }}" {% if governorate == g %}selected{% endif %}>{{ g }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="field">
+        <span>الحالة</span>
+        <select name="status">
+          <option value="">الكل</option>
+          <option value="published" {% if status == "published" %}selected{% endif %}>متاحة</option>
+          <option value="closing_soon" {% if status == "closing_soon" %}selected{% endif %}>قاربت على الإغلاق</option>
+          <option value="closed" {% if status == "closed" %}selected{% endif %}>مغلقة</option>
+          <option value="cancelled" {% if status == "cancelled" %}selected{% endif %}>ملغاة</option>
+        </select>
+      </label>
+      <div class="filter-actions">
+        <button class="btn btn-primary" type="submit">تطبيق الفلتر</button>
+        <a class="btn btn-ghost" href="/search">مسح</a>
+      </div>
+    </div>
+  </form>
+
+  <div class="table-meta">
+    <div>
+      <strong>{{ total_count }}</strong>
+      <span>مناقصة مطابقة</span>
+    </div>
+    {% if total_count %}
+    <span class="table-meta-range">عرض {{ showing_from }}–{{ showing_to }} من {{ total_count }}</span>
+    {% endif %}
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>المناقصة</th>
+          <th>المصدر</th>
+          <th>جهة التعاقد</th>
+          <th>الحالة</th>
+          <th>الوقت المتبقي</th>
+          <th>آخر موعد</th>
+          <th>مرفقات</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in tenders %}
+        <tr>
+          <td>
+            <a class="table-title" href="/tenders/{{ item.tender.id }}">{{ item.tender.title }}</a>
+            {% if item.tender.tender_number %}
+            <div class="table-sub">رقم {{ item.tender.tender_number }}</div>
+            {% endif %}
+          </td>
+          <td>
+            <span class="source-pill" title="{{ item.source_name }}">{{ item.source_name }}</span>
+          </td>
+          <td>
+            <div class="table-org">{{ item.organization_name }}</div>
+          </td>
+          <td>
+            <span class="badge status-{{ item.tender.status }}">{{ item.status_label }}</span>
+          </td>
+          <td>
+            <span class="remain {% if item.remaining.is_expired %}expired{% endif %}">{{ item.remaining.label }}</span>
+          </td>
+          <td>
+            {% if item.tender.submission_deadline %}
+              {{ item.tender.submission_deadline.strftime("%d/%m/%Y") }}
+            {% else %}—{% endif %}
+          </td>
+          <td>{{ item.documents|length }}</td>
+          <td class="table-action">
+            <a class="btn btn-small btn-secondary" href="/tenders/{{ item.tender.id }}">التفاصيل</a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="8" class="table-empty">لا توجد نتائج مطابقة للفلتر الحالي.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if total_pages > 1 %}
+  <nav class="pagination" aria-label="تصفح الصفحات">
+    {% if has_prev %}
+    <a class="page-btn" href="/search?q={{ q }}&governorate={{ governorate }}&status={{ status }}&page={{ page - 1 }}">السابق</a>
+    {% else %}
+    <span class="page-btn is-disabled">السابق</span>
+    {% endif %}
+
+    {% if page_numbers and page_numbers[0] > 1 %}
+    <a class="page-btn" href="/search?q={{ q }}&governorate={{ governorate }}&status={{ status }}&page=1">1</a>
+    {% if page_numbers[0] > 2 %}<span class="page-ellipsis">…</span>{% endif %}
+    {% endif %}
+
+    {% for p in page_numbers %}
+      {% if p == page %}
+      <span class="page-btn is-current" aria-current="page">{{ p }}</span>
+      {% else %}
+      <a class="page-btn" href="/search?q={{ q }}&governorate={{ governorate }}&status={{ status }}&page={{ p }}">{{ p }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_numbers and page_numbers[-1] < total_pages %}
+    {% if page_numbers[-1] < total_pages - 1 %}<span class="page-ellipsis">…</span>{% endif %}
+    <a class="page-btn" href="/search?q={{ q }}&governorate={{ governorate }}&status={{ status }}&page={{ total_pages }}">{{ total_pages }}</a>
+    {% endif %}
+
+    {% if has_next %}
+    <a class="page-btn" href="/search?q={{ q }}&governorate={{ governorate }}&status={{ status }}&page={{ page + 1 }}">التالي</a>
+    {% else %}
+    <span class="page-btn is-disabled">التالي</span>
+    {% endif %}
+  </nav>
+  {% endif %}
+</section>
+{% endblock %}
