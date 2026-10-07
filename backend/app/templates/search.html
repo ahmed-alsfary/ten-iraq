@@ -69,6 +69,7 @@
           <th>الحالة</th>
           <th>الوقت المتبقي</th>
           <th>آخر موعد</th>
+          <th>تاريخ الإضافة</th>
           <th>مرفقات</th>
           <th></th>
         </tr>
@@ -99,6 +100,12 @@
               {{ item.tender.submission_deadline.strftime("%d/%m/%Y") }}
             {% else %}—{% endif %}
           </td>
+          <td>
+            {% if item.added_at %}
+              {{ item.added_at.strftime("%d/%m/%Y") }}
+              <div class="table-sub">{{ item.added_at.strftime("%H:%M") }}</div>
+            {% else %}—{% endif %}
+          </td>
           <td>{{ item.documents|length }}</td>
           <td class="table-action">
             <a class="btn btn-small btn-secondary" href="/tenders/{{ item.tender.id }}">التفاصيل</a>
@@ -106,7 +113,7 @@
         </tr>
         {% else %}
         <tr>
-          <td colspan="8" class="table-empty">لا توجد نتائج مطابقة للفلتر الحالي.</td>
+          <td colspan="9" class="table-empty">لا توجد نتائج مطابقة للفلتر الحالي.</td>
         </tr>
         {% endfor %}
       </tbody>

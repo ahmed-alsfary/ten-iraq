@@ -38,6 +38,7 @@ def serialize_tender(tender: Tender) -> TenderOut:
         source_id=tender.source_id,
         publication_date=tender.publication_date,
         submission_deadline=tender.submission_deadline,
+        created_at=tender.created_at,
         estimated_value=tender.estimated_value,
         currency=tender.currency,
         status=tender.status,

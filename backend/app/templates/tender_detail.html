@@ -72,6 +72,16 @@
         <dd>{% if tender.publication_date %}{{ tender.publication_date.strftime("%d/%m/%Y") }}{% else %}—{% endif %}</dd>
       </div>
       <div>
+        <dt>تاريخ الإضافة للمنصة</dt>
+        <dd>
+          {% if added_at %}
+            {{ added_at.strftime("%d/%m/%Y %H:%M") }}
+          {% elif tender.created_at %}
+            {{ tender.created_at.strftime("%d/%m/%Y %H:%M") }}
+          {% else %}—{% endif %}
+        </dd>
+      </div>
+      <div>
         <dt>آخر موعد للتقديم</dt>
         <dd>
           {% if tender.submission_deadline %}

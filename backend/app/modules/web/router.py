@@ -46,6 +46,7 @@ def _tender_view(tender: Tender) -> dict:
         "document_purchase_place": fields.get("document_purchase_place") or tender.location,
         "subject": fields.get("subject"),
         "documents": list(tender.documents or []),
+        "added_at": tender.created_at,
     }
 
 

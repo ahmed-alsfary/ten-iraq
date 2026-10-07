@@ -42,6 +42,7 @@ class TenderOut(ORMModel):
     source_id: Optional[str]
     publication_date: Optional[date]
     submission_deadline: Optional[datetime]
+    created_at: Optional[datetime] = None
     estimated_value: Optional[Decimal]
     currency: str
     status: str

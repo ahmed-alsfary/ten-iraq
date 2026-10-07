@@ -63,6 +63,9 @@
           {% if item.tender.submission_deadline %}
           <span class="deadline">آخر موعد: {{ item.tender.submission_deadline.strftime("%d/%m/%Y") }}</span>
           {% endif %}
+          {% if item.added_at %}
+          <span class="deadline">أُضيفت: {{ item.added_at.strftime("%d/%m/%Y %H:%M") }}</span>
+          {% endif %}
         </a>
       </li>
       {% endfor %}
